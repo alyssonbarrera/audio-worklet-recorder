@@ -10,7 +10,7 @@
 
 **A high-performance real-time audio processing system built with Audio Worklet API for seamless integration with OpenAI's Realtime API**
 
-[✨ Features](#-features) • [🏗️ Architecture](#%EF%B8%8F-architecture) • [🚀 Quick Start](#-quick-start) • [📖 API Reference](#-api-reference)
+[✨ Features](#-features) • [🏗️ Architecture](#%EF%B8%8F-architecture) • [🚀 Quick Start](#-quick-start) • [� Backend Integration](#-backend-integration) • [�📖 API Reference](#-api-reference)
 
 </div>
 
@@ -18,18 +18,22 @@
 
 ## 🎯 Overview
 
-This project demonstrates a **production-ready real-time audio streaming system** that captures microphone input, processes it through the Audio Worklet API, converts it to the precise format required by OpenAI's Realtime API (PCM16 at 24kHz), and streams it via WebSocket for seamless voice AI interactions.
+This project demonstrates a **production-ready real-time audio streaming frontend** that captures microphone input, processes it through the Audio Worklet API, converts it to the precise format required by OpenAI's Realtime API (PCM16 at 24kHz), and streams it via WebSocket to a backend server for seamless voice AI interactions.
 
-The system functions as a **live audio bridge** between your microphone and OpenAI's Realtime API, enabling natural conversation flows with AI assistants. Rather than traditional recording sessions, it maintains persistent connections for continuous audio streaming and real-time AI responses.
+The system functions as a **live audio bridge frontend** between your microphone and a backend server that connects to OpenAI's Realtime API, enabling natural conversation flows with AI assistants. Rather than traditional recording sessions, it maintains persistent connections for continuous audio streaming and real-time AI responses.
+
+**Note**: This repository contains only the frontend implementation. A separate backend server is required for OpenAI integration.
+
+**🔗 Backend Server**: A compatible backend implementation is available at [audio-worklet-recorder-server](https://github.com/alyssonbarrera/audio-worklet-recorder-server)
 
 ### 🎪 What Makes This Special?
 
-- **🔥 Audio Worklet API**: Processes audio in a dedicated thread for zero-latency performance
-- **⚡ Real-time Streaming**: Sub-millisecond audio processing with continuous live streaming
+- **🔥 Audio Worklet API**: Processes audio in a dedicated thread for minimal-latency performance
+- **⚡ Real-time Streaming**: Low-latency audio processing with continuous live streaming
 - **🎵 Smart Resampling**: Advanced resampling from any input rate to 24kHz with anti-aliasing filter
 - **🔊 PCM16 Precision**: Bit-perfect conversion from Float32 to 16-bit PCM with proper scaling
 - **🔄 WebSocket Streaming**: Efficient base64-encoded audio chunks for real-time transmission
-- **🎛️ Live Controls**: Connect/disconnect and mute/unmute without session interruption
+- **🎛️ Live Controls**: Connect/disconnect without session interruption
 - **📊 Audio Validation**: Comprehensive pipeline testing and quality validation
 - **🏗️ Clean Architecture**: Modular, testable, and maintainable TypeScript codebase
 - **🎵 Session Recording**: Generate downloadable WAV files from streaming sessions
@@ -48,7 +52,7 @@ The system functions as a **live audio bridge** between your microphone and Open
 
 ### ⚡ **Real-Time Streaming**
 - **Audio Worklet Integration**: Processes audio in a dedicated thread for maximum performance
-- **Zero-Latency Connection**: Instant connect/disconnect with comprehensive resource cleanup
+- **Low-Latency Connection**: Fast connect/disconnect with comprehensive resource cleanup
 - **Intelligent Buffering**: Optimized chunk-based streaming with configurable buffer sizes
 - **Background Processing**: Non-blocking audio processing pipeline that never freezes the UI
 - **Advanced Resampling**: High-quality resampling with 15-coefficient anti-aliasing filter
@@ -56,7 +60,7 @@ The system functions as a **live audio bridge** between your microphone and Open
 
 ### 🔌 **OpenAI Integration**
 - **Realtime API Ready**: Perfect PCM16 24kHz format optimized for OpenAI's requirements
-- **WebSocket Streaming**: Seamless backend integration via Socket.IO with connection pooling
+- **WebSocket Streaming**: Frontend connects to backend server via Socket.IO with connection pooling
 - **Session Management**: Robust connection lifecycle with automatic reconnection
 - **Error Handling**: Comprehensive error recovery and connection retry logic
 - **Live Monitoring**: Real-time transmission statistics and connection status
@@ -111,7 +115,7 @@ flowchart LR
 
 5. **📦 Encoding & Transmission**
    ```typescript
-   ArrayBuffer → Base64 → WebSocket → Backend
+   ArrayBuffer → Base64 → WebSocket → Backend Server → OpenAI API
    ```
 
 ### 🗂️ **Project Structure**
@@ -147,8 +151,8 @@ src/
 │   └── openai-websocket-client.ts      # WebSocket communication layer
 ├── 🛠️ utils/
 │   ├── audio-utils.ts                  # Core audio conversion utilities
-│   ├── audio-validation.ts            # Comprehensive audio pipeline testing
-│   └── wav-utils.ts                   # WAV file generation utilities
+│   ├── audio-validation.ts             # Comprehensive audio pipeline testing
+│   └── wav-utils.ts                    # WAV file generation utilities
 ├── 📚 lib/
 │   └── utils.ts                        # General utility functions
 ├── app.tsx                             # Main application component
@@ -158,7 +162,7 @@ src/
 
 📁 public/
 ├── audio-processor.js                  # Audio Worklet implementation
-└── vite.svg                           # Vite logo
+└── vite.svg                            # Vite logo
 ```
 
 ---
@@ -170,7 +174,7 @@ src/
 - **Node.js** 18+ (LTS recommended)
 - **Modern Browser** with Audio Worklet support (Chrome 66+, Firefox 76+, Safari 14.1+)
 - **HTTPS** (required for microphone access in production)
-- **Backend Server** (optional, for OpenAI integration)
+- **Backend Server** (required for OpenAI integration - see [audio-worklet-recorder-server](https://github.com/alyssonbarrera/audio-worklet-recorder-server))
 
 ### ⚡ **Installation**
 
@@ -196,6 +200,10 @@ pnpm dev
 # Open your browser and navigate to http://localhost:5173
 ```
 
+**⚠️ Important**: This frontend requires a separate backend server for OpenAI integration. The application will show connection status in the UI. Ensure your backend server is running and accessible at the configured WebSocket endpoint (default: `http://localhost:3000`).
+
+**🔗 Get the Backend**: Clone and setup the compatible backend from [audio-worklet-recorder-server](https://github.com/alyssonbarrera/audio-worklet-recorder-server)
+
 ### 🔨 **Build for Production**
 
 ```bash
@@ -208,28 +216,56 @@ pnpm preview
 
 ---
 
+## 🔗 Backend Integration
+
+This frontend requires a compatible backend server to handle OpenAI Realtime API integration. 
+
+### 🚀 **Quick Backend Setup**
+
+1. **Clone the Backend Repository**:
+   ```bash
+   git clone https://github.com/alyssonbarrera/audio-worklet-recorder-server.git
+   cd audio-worklet-recorder-server
+   ```
+
+2. **Follow Backend Setup Instructions**: 
+   - Configure your OpenAI API key
+   - Install dependencies and start the server
+   - The backend will run on `http://localhost:3000` by default
+
+3. **Start Both Applications**:
+   - Backend server (handles OpenAI integration)
+   - Frontend application (this repository)
+
+**📖 Repository**: [audio-worklet-recorder-server](https://github.com/alyssonbarrera/audio-worklet-recorder-server)
+
+---
+
 ## 🎮 Usage Guide
 
 ### 🎙️ **Basic Usage**
 
-1. **� Connect**: Click "Connect" to initialize the OpenAI connection and start live audio streaming
-2. **🔇 Mute Control**: Use the mute button to pause/resume audio processing without disconnecting
-3. **🔌 Disconnect**: Click "Disconnect" to end the session, cleanup all resources, and generate playback
-4. **🎵 Playback**: Listen to your recorded audio with the built-in audio player
-5. **📊 Pipeline Testing**: Use "Test Audio Pipeline" to validate the conversion process
+1. **🔗 Connect**: Click "Connect" to initialize the backend connection and start live audio streaming
+2. **🔌 Disconnect**: Click "Disconnect" to end the session, cleanup all resources, and generate playback
+3. **🎵 Playback**: Listen to your recorded audio with the built-in audio player
+4. **📊 Pipeline Testing**: Use "Test Audio Pipeline" to validate the conversion process
+
+**⚠️ Backend Required**: The Connect functionality requires a running backend server that handles OpenAI Realtime API integration.
+
+**🔗 Setup Backend**: Get the compatible backend server from [audio-worklet-recorder-server](https://github.com/alyssonbarrera/audio-worklet-recorder-server) and follow its setup instructions.
 
 ### 🌊 **Real-Time Streaming Flow**
 
 When you click "Connect", the application:
 - **Initializes** the microphone and audio processing pipeline
-- **Connects** to the OpenAI WebSocket for real-time communication  
-- **Streams** live audio (PCM16 24kHz) to OpenAI's Realtime API
-- **Receives** and plays AI responses in real-time
+- **Connects** to the backend server via WebSocket for real-time communication  
+- **Streams** live audio (PCM16 24kHz) to the backend server (which forwards to OpenAI's Realtime API)
+- **Receives** and plays AI responses in real-time via the backend
 - **Maintains** the connection for continuous conversation
 
 When you click "Disconnect", the application:
 - **Stops** all audio streaming and processing
-- **Closes** the OpenAI WebSocket connection
+- **Closes** the WebSocket connection to the backend server
 - **Cleans up** all audio resources (contexts, streams, buffers)
 - **Generates** a downloadable WAV file from the session
 
@@ -248,26 +284,6 @@ This validates:
 - ✅ Base64 encoding/decoding integrity with round-trip testing  
 - ✅ Audio data validation logic with edge case detection
 - ✅ Sine wave generation for known-good test data
-
-### 🌐 **WebSocket Integration**
-
-For OpenAI integration, you'll need a backend server. See [WEBSOCKET_INTEGRATION.md](./WEBSOCKET_INTEGRATION.md) for detailed setup instructions.
-
-**Quick Backend Setup:**
-```javascript
-// Example Socket.IO server
-const io = require('socket.io')(3000);
-
-io.on('connection', (socket) => {
-  socket.on('audio_chunk', (base64Audio) => {
-    // Forward to OpenAI Realtime API
-    openaiWebSocket.send({
-      type: 'input_audio_buffer.append',
-      audio: base64Audio
-    });
-  });
-});
-```
 
 ---
 
@@ -292,9 +308,9 @@ class AudioRecordingService {
   setMuted(muted: boolean): void
   toggleMute(): boolean
   
-  // OpenAI connection management with complete cleanup
+  // Backend connection management with complete cleanup
   initializeOpenAIConnection(): Promise<void>
-  closeOpenAIConnection(): void // Now includes comprehensive resource cleanup
+  closeOpenAIConnection(): void
 }
 ```
 
@@ -334,7 +350,7 @@ function endSession(): void
 
 // Audio streaming with validation
 function sendAudioChunk(base64Audio: string): void
-function notifyMute(): void
+function notifyMute(): void // Optional mute notification
 
 // Status monitoring and analytics
 function getConnectionStatus(): { isConnected: boolean; isSessionActive: boolean }
@@ -467,14 +483,16 @@ console.log('Average chunk size:', stats.averageChunkSize);
 
 **Problem**: Connection failed or "Not connected to OpenAI"
 ```bash
-# Ensure backend is running on the correct port
-node server.js
+# This frontend requires a separate backend server for OpenAI integration
+# Get the backend from: https://github.com/alyssonbarrera/audio-worklet-recorder-server
+# Ensure your backend server is running on the configured port (default: 3000)
 
-# Check if port 3000 is available and not blocked
+# Check if the backend port is available and accessible
 netstat -an | grep 3000  # Linux/macOS
 netstat -an | findstr 3000  # Windows
 
 # Verify CORS settings if frontend and backend are on different domains
+# Check backend logs for connection attempts
 ```
 
 **Problem**: Audio chunks not being received by backend
@@ -485,7 +503,8 @@ const stats = getTransmissionStats();
 console.log('Connection status:', status);
 console.log('Transmission stats:', stats);
 
-// Also verify backend is logging received chunks
+// Also verify your backend server is logging received chunks
+// Ensure WebSocket events are properly handled on backend
 ```
 
 ### 🏗️ **Build Issues**
@@ -557,6 +576,21 @@ pnpm build
 # Format code with Biome
 pnpm biome format --write src/
 ```
+
+---
+
+## 🎥 Demo
+
+See the application in action with real-time audio streaming and OpenAI integration:
+
+https://github.com/user-attachments/assets/564c0df5-a280-45e0-a4fe-9c7fc0972eff
+
+> **🎯 What you'll see in the demo:**
+> - Real-time microphone capture with Audio Worklet processing
+> - Live audio streaming to backend server (which connects to OpenAI Realtime API)
+> - Bidirectional conversation with AI responses
+> - Low-latency audio processing and streaming
+> - Connect/disconnect controls
 
 ---
 

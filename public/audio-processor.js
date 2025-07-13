@@ -68,9 +68,9 @@ class AudioProcessor extends AudioWorkletProcessor {
   }
 
   sendAudioDataToMainThread(audioData) {
-    const originalBuffer = audioData.buffer.slice();
+    const originalBuffer = audioData.buffer;
     const resampledData = resampleTo24kHz(audioData, this.inputSampleRate);
-    const resampledBuffer = resampledData.buffer.slice();
+    const resampledBuffer = resampledData.buffer;
 
     this.port.postMessage(
       {

@@ -20,7 +20,6 @@ export function useOpenAIConnection() {
 
   const {
     addAudioChunk,
-    resetStreaming,
     initializeAudioContext,
     isPlaying: isStreamingAudio,
     stopPlayback: stopAudioStreaming,
@@ -31,7 +30,7 @@ export function useOpenAIConnection() {
       onBackendReady: (data) => {
         console.log('Backend ready received:', data.message);
         setConnectionStatus('ready');
-        resetStreaming();
+        stopAudioStreaming();
       },
       onTranscriptionFinal: (message) => {
         console.log('Transcription final:', message);
@@ -55,7 +54,7 @@ export function useOpenAIConnection() {
     return () => {
       defaultClient.clearEventCallbacks();
     };
-  }, [addAudioChunk, resetStreaming]);
+  }, [addAudioChunk, stopAudioStreaming]);
 
   const initializeConnection = useCallback(
     async (audioService: AudioRecordingService) => {
@@ -74,13 +73,12 @@ export function useOpenAIConnection() {
 
       // Stop audio streaming and reset streaming state
       stopAudioStreaming();
-      resetStreaming();
 
       if (audioService) {
         audioService.closeOpenAIConnection();
       }
     },
-    [stopAudioStreaming, resetStreaming]
+    [stopAudioStreaming]
   );
 
   return {

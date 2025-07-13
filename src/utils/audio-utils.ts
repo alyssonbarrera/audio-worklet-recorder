@@ -98,3 +98,94 @@ export function base64ToFloat32Array(base64: string): Float32Array {
   const arrayBuffer = base64ToArrayBuffer(base64);
   return pcm16ToFloat32Array(arrayBuffer);
 }
+
+/**
+ * Regex for base64 data URL cleanup
+ */
+export const DATA_URL_REGEX = /^data:audio\/[^;]+;base64,/;
+
+/**
+ * Decodes a base64 audio chunk to Uint8Array
+ */
+export function decodeBase64AudioChunk(base64Chunk: string): Uint8Array {
+  const binaryString = atob(base64Chunk.replace(DATA_URL_REGEX, ''));
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes;
+}
+
+/**
+ * Combines leftover bytes with new chunk bytes
+ */
+export function combineWithLeftoverBytes(
+  leftoverBytes: Uint8Array | null,
+  newBytes: Uint8Array
+): Uint8Array {
+  if (!leftoverBytes) {
+    return newBytes;
+  }
+
+  const combinedBytes = new Uint8Array(leftoverBytes.length + newBytes.length);
+  combinedBytes.set(leftoverBytes, 0);
+  combinedBytes.set(newBytes, leftoverBytes.length);
+  return combinedBytes;
+}
+
+/**
+ * Processes bytes for audio streaming, handling odd-length chunks
+ */
+export function processBytesForStreaming(bytes: Uint8Array): {
+  bytesToProcess: Uint8Array;
+  leftoverByte: Uint8Array | null;
+} {
+  const isOddLength = bytes.length % 2 !== 0;
+
+  if (isOddLength) {
+    return {
+      bytesToProcess: bytes.slice(0, -1),
+      leftoverByte: bytes.slice(-1),
+    };
+  }
+
+  return {
+    bytesToProcess: bytes,
+    leftoverByte: null,
+  };
+}
+
+/**
+ * Converts processed bytes to Float32Array for audio playback
+ */
+export function bytesToFloat32Array(bytes: Uint8Array): Float32Array {
+  const int16Array = new Int16Array(
+    bytes.buffer,
+    bytes.byteOffset,
+    bytes.length / 2
+  );
+
+  const float32Array = new Float32Array(int16Array.length);
+
+  for (let i = 0; i < int16Array.length; i++) {
+    float32Array[i] = int16Array[i] / 32_767;
+  }
+
+  return float32Array;
+}
+
+/**
+ * Creates an AudioBuffer from Float32Array
+ */
+export function createAudioBufferFromFloat32Array(
+  audioContext: AudioContext,
+  float32Array: Float32Array
+): AudioBuffer {
+  const audioBuffer = audioContext.createBuffer(
+    1,
+    float32Array.length,
+    audioContext.sampleRate
+  );
+  audioBuffer.copyToChannel(float32Array, 0);
+  return audioBuffer;
+}
